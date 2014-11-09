@@ -17,6 +17,7 @@ import fileinput
 import sys
 import re
 import string
+import unicodedata
 
 
 # Function converts timestamp of API tweet: Mon, 15 Apr 2013 21:11:17 +0000
@@ -84,9 +85,20 @@ for line in fileinput.input():
 		words = tweet.split()	# Split by space
 		for idx, word in enumerate(words):
 			if hashtag_pattern.match(word):
+				
 			
 				# Emits hastag and timestamp--tab delimiter
-				print word.lower() + '\t' + timestamp
+				if hashtag_pattern.match(word):
+					
+					# Ignores ascii/unicode characters
+					word = word.encode('ascii', 'ignore')
+					word = re.sub(r'[^a-zA-Z0-9#]', '', word)
+					
+					# Accounts for multiple hashtags without space
+					word = word.split('#')
+					for w in word:
+						if w != '':
+							print '#' + w.lower() + '\t' + timestamp
 		
 		
 		
