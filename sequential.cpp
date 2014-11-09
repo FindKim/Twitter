@@ -19,6 +19,7 @@
 #include <map>
 #include <utility>
 #include <cstring>
+#include <boost/unordered_map.hpp>
 
 #define DEBUG
 
@@ -36,19 +37,25 @@ int main(int argc, char *argv[])
 	//get a reading stream and a writing stream
 	ifstream inFile;
 	ofstream outFile;
-//	FILE * = fopen(argv[1], "r");
-//	FILE * outFile = fopen(argv[2], "w");
 	
 	//bin width in minutes
 	int BIN_WIDTH = atoi(argv[3]);
 	
 	//map of hashtag keys and all associated timestamps
-	map<string, map < string, int > > hashtags_to_map;
+	boost::unordered_map<string, boost::unordered_map<string, int> >  hashtags_to_map;
 	
 	//the current tweet we are parsing
 	string current_tweet;
-	
-	
+
+	//working toward the timestamp
+	string created_string = "\"created_at\":";
+	string working_to_timestamp;
+	string minute_timestamp;
+	string bin_timestamp;
+	int temp_index;
+	int end_index;
+	int i;
+
 /////END DECLARING VARIABLES
 	inFile.open(argv[1], ios_base::in);
 	outFile.open(argv[2], ios_base::out);
@@ -65,16 +72,27 @@ int main(int argc, char *argv[])
 		getline(inFile, current_tweet);
 		
 		#ifdef DEBUG
-			cout << endl << current_tweet << endl;
+//			cout << endl << current_tweet << endl;
 		#endif
-	}
-		//strtok to the timestamp
+	
+		// to the timestamp
+			temp_index = current_tweet.find(created_string) + created_string.length() + 7;
+			end_index = temp_index;
+			for(i = 0; i < 2; i++)
+			{
+				end_index = current_tweet.find(":", end_index + 1);
+			}			
+			working_to_timestamp = current_tweet.substr(temp_index, end_index-temp_index);
+			cout << working_to_timestamp << endl;
 			//manipulate the timestamp via more strtoks(NULL)
 		
 		//strtok(originalString) until you find "text":
 			//strtok(NULL) for # or the end of text field
 			//if the first character is #, "emit" the hashtag word and the new timestamp by putting them into the hashmap
-	//end get a line loop
+		#ifdef DEBUG
+		return 1;
+		#endif
+	}//end get a line loop
 	
 	//foreach key in the hashmap
 //		cout << endl << key << ": " << endl;
