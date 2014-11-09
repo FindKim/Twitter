@@ -18,13 +18,11 @@ import fileinput
 import sys
 import re
 import string
+from collections import OrderedDict
 
 BIN = 15
 KEY, VALUE = range(2)
 hashtag_dict = dict()
-
-# Function orders by timestamp
-
 
 
 for line in fileinput.input():
@@ -39,7 +37,10 @@ for line in fileinput.input():
 	hashtag_dict[key] += 1
 	#print key, hashtag_dict[key]
 
-for h in hashtag_dict:
-	print h + "\t" + str(hashtag_dict[h])
+# Orders by timestamp
+hashtag_ordered = OrderedDict(sorted(hashtag_dict.items()))
+
+for h in hashtag_ordered:
+	print h + "\t" + str(hashtag_ordered[h])
 		
 		
