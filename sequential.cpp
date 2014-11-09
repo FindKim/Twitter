@@ -57,9 +57,12 @@ int main(int argc, char *argv[])
 	string whole_timestamp;
 	string minute_timestamp;
 	string bin_timestamp;
+	vector<string> timestamp_parts;
+	string numbered_month;
 
 	//working toward finding hashtags
-	string textField;
+	string text_of_tweet_string = "\"text\": \"";
+	
 
 	//general indicies for loops and string work
 	int temp_index;
@@ -83,26 +86,23 @@ int main(int argc, char *argv[])
 	while(!inFile.eof())
 	{
 		//find the the timestamp
-		temp_index = current_tweet.find(created_string) + created_string.length() + 7;
+		temp_index = current_tweet.find(created_string) + created_string.length() + 7;  //there's some spaces and a constant length day of the week
 		end_index = temp_index;
 		for(i = 0; i < 2; i++)
 		{
-			cout << "In the end_index for loop" << endl;
 			end_index = current_tweet.find(":", end_index + 1);
 		}			
 		whole_timestamp = current_tweet.substr(temp_index, end_index-temp_index);
 		
-		vector<string> timestamp_parts;
-		
 		boost::algorithm::split(timestamp_parts, whole_timestamp, boost::algorithm::is_any_of(" "));
 		
-		string numbered_month;
 		getNumberedMonth(&numbered_month, timestamp_parts[1]);
 
 		minute_timestamp = timestamp_parts[2].append(" ").append(numbered_month).append(" ").append(timestamp_parts[0]).append(" ").append(timestamp_parts[3]);
 		
 		//we have the minute timestamp, now look for #
-
+		temp_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();
+		
 		//strtok(originalString) until you find "text":
 			//strtok(NULL) for # or the end of text field
 			//if the first character is #, "emit" the hashtag word and the new timestamp by putting them into the hashmap
