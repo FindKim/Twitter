@@ -25,36 +25,36 @@ import unicodedata
 WEEKDAY, DAY, MONTH, YEAR, TIME, MISC = range(6)	# 0, 1, 2, 3, 4, 5
 def convert_timestamp(ts):
 
-	month = int()
+	month = str()
 	ts = ts.split()	# Split by space
 	if ts[MONTH] == 'Jan':
-		month = 1
+		month = '01'
 	elif ts[MONTH] == 'Feb':
-		month = 2
+		month = '02'
 	elif ts[MONTH] == 'Mar':
-		month = 3
+		month = '03'
 	elif ts[MONTH] == 'Apr':
-		month = 4
+		month = '04'
 	elif ts[MONTH] == 'May':
-		month = 5
+		month = '05'
 	elif ts[MONTH] == 'Jun':
-		month = 6
+		month = '06'
 	elif ts[MONTH] == 'Jul':
-		month = 7
+		month = '07'
 	elif ts[MONTH] == 'Aug':
-		month = 8
+		month = '08'
 	elif ts[MONTH] == 'Sep':
-		month = 9
+		month = '09'
 	elif ts[MONTH] == 'Oct':
-		month = 10
+		month = '10'
 	elif ts[MONTH] == 'Nov':
-		month = 11
+		month = '11'
 	elif ts[MONTH] == 'Dec':
-		month = 12
+		month = '12'
 	else:
 		print "Error with " + ts[MONTH]
 	
-	ts = ts[YEAR] + " " + str(month) + " " + ts[DAY] + " " + ts[TIME]
+	ts = ts[YEAR] + " " + month + " " + ts[DAY] + " " + ts[TIME]
 	return ts
 
 
