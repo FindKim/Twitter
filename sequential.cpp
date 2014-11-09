@@ -20,10 +20,15 @@
 #include <utility>
 #include <cstring>
 #include <boost/unordered_map.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <sstream>
 
 #define DEBUG
 
 using namespace std;
+
+void getNumberedMonth(string *toFill, string input);
 
 int main(int argc, char *argv[])
 {
@@ -54,6 +59,7 @@ int main(int argc, char *argv[])
 	string bin_timestamp;
 	int temp_index;
 	int end_index;
+	int start_index;
 	int i;
 
 /////END DECLARING VARIABLES
@@ -71,21 +77,24 @@ int main(int argc, char *argv[])
 		//get a line, will set eofbit on infile if it hits it
 		getline(inFile, current_tweet);
 		
-		#ifdef DEBUG
-//			cout << endl << current_tweet << endl;
-		#endif
-	
-		// to the timestamp
-			temp_index = current_tweet.find(created_string) + created_string.length() + 7;
-			end_index = temp_index;
-			for(i = 0; i < 2; i++)
-			{
-				end_index = current_tweet.find(":", end_index + 1);
-			}			
-			working_to_timestamp = current_tweet.substr(temp_index, end_index-temp_index);
-			cout << working_to_timestamp << endl;
-			//manipulate the timestamp via more strtoks(NULL)
+		//find the the timestamp
+		temp_index = current_tweet.find(created_string) + created_string.length() + 7;
+		end_index = temp_index;
+		for(i = 0; i < 2; i++)
+		{
+			end_index = current_tweet.find(":", end_index + 1);
+		}			
+		working_to_timestamp = current_tweet.substr(temp_index, end_index-temp_index);
 		
+		vector<string> timestamp_parts;
+		
+		boost::algorithm::split(timestamp_parts, working_to_timestamp, boost::algorithm::is_any_of(" "));
+		
+		string numbered_month;
+		getNumberedMonth(&numbered_month, timestamp_parts[1]);
+
+		minute_timestamp = timestamp_parts[2].append(" ").append(numbered_month).append(" ").append(timestamp_parts[0]).append(" ").append(timestamp_parts[3]);
+		cout << minute_timestamp << endl;
 		//strtok(originalString) until you find "text":
 			//strtok(NULL) for # or the end of text field
 			//if the first character is #, "emit" the hashtag word and the new timestamp by putting them into the hashmap
@@ -99,3 +108,31 @@ int main(int argc, char *argv[])
 		//foreach pair of timestamp, number values
 //		cout <<"\t"<< timestamp << ": " << number << endl;
 }	
+
+void getNumberedMonth(string * toFill, string input)
+{
+	if(input == "Jan")
+		*toFill = "01";
+	else if(input == "Feb")
+		*toFill = "02";
+	else if(input == "Mar")
+		*toFill = "03";
+	else if(input == "Apr")
+		*toFill = "04";
+	else if(input == "May")
+		*toFill = "05";
+	else if(input == "Jun")
+		*toFill = "06";
+	else if(input == "Jul")
+		*toFill = "07";
+	else if(input == "Aug")
+		*toFill = "08";
+	else if(input == "Sep")
+		*toFill = "09";
+	else if(input == "Oct")
+		*toFill = "10";
+	else if(input == "Nov")
+		*toFill = "11";
+	else if(input == "Dec")
+		*toFill = "12";
+}
