@@ -123,16 +123,23 @@ int main(int argc, char *argv[])
 					cout << "\tOne hashtag is: " << current_hashtag << endl;
 				#endif
 
-				//get the map of timestamp bins to counts for this hashtag
+				//get a reference to the map of timestamp bins to counts for this hashtag
+				#ifdef DEBUG
+					cout << "\t\thashtags_to_mapp[current_hashtag][bin_timestamp] before: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
+				#endif
+				
+				hashtags_to_maps[current_hashtag][bin_timestamp]++;			
+
+				#ifdef DEBUG
+					cout << "\t\thashtags_to_maps[current_hashtag][bin_timestamp] after: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
+				#endif
+/*
 				temp_bin_map = hashtags_to_maps[current_hashtag];
-				#ifdef DEBUG
-					cout << "\t\ttemp_bin_map for this hashtag: " << current_hashtag << " => " << temp_bin_map[current_hashtag] << endl;
-				#endif
 				//increment the count in the correct timestamp bin, which is 0 on creation because c++ is nice to us like that
-				++temp_bin_map[bin_timestamp]; 
+				temp_bin_map[bin_timestamp] = temp_bin_map[bin_timestamp] + 1; 
 				#ifdef DEBUG
-					cout << "\t\ttemp_bin_map after increment: " << current_hashtag << " => " << temp_bin_map[current_hashtag] << endl;
-				#endif
+					cout << "\t\ttemp_bin_map after increment: " << bin_timestamp << " => " << temp_bin_map[bin_timestamp] << endl;
+				#endif */
 			}
 		}
 		//get a line
