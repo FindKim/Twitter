@@ -170,16 +170,18 @@ int main(int argc, char *argv[])
 		}
 		//17 spaces on the timestamp
 		qsort((void *) tstamps, hashtags_timestamps.size(), 17, alphabetize);
-		cout << endl <<  "------------------------------------------------------------------------------------------" << endl << tag_iter->first << endl;
+		outFile << endl <<  "------------------------------------------------------------------------------------------" << endl << tag_iter->first << endl;
 		for(i = 0; i < hashtags_timestamps.size(); i++)
 		{
-			cout << "\t" << hashtags_timestamps[i] << ": " << temp_bin_map[hashtags_timestamps[i]] << endl;
+			outFile << "\t" << hashtags_timestamps[i] << ": " << temp_bin_map[hashtags_timestamps[i]] << endl;
 		}
-		cout << "------------------------------------------------------------------------------------------" << endl;
+		outFile << "------------------------------------------------------------------------------------------" << endl;
 //		cout << endl << key << ": " << endl;
 		//foreach pair of timestamp, number values
 //		cout <<"\t"<< timestamp << ": " << number << endl;
 	}
+	inFile.close();
+	outFile.close();
 }	
 
 int alphabetize(const void * first, const void * second)
