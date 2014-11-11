@@ -25,6 +25,7 @@
 #include <sstream>
 #include <ctype.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #define DEBUG
 
@@ -32,6 +33,7 @@ using namespace std;
 
 void getNumberedMonth(string *toFill, string input); 
 void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill);
+int alphabetize(const void * first, const void * second);
 
 int main(int argc, char *argv[])
 {
@@ -155,15 +157,45 @@ int main(int argc, char *argv[])
 		temp_bin_map = tag_iter->second; //get the value, which is another map
 
 		last_timestamp = temp_bin_map.end(); //save more function calls
+		vector<string> hashtags_timestamps;
 		for(time_iter = temp_bin_map.begin(); time_iter != last_timestamp; ++time_iter)
 		{
-				
+			hashtags_timestamps.push_back(time_iter->first);
 		}
+							 //Y    _   M   _   D   _   T _'\0'
+		const char *tstamps[hashtags_timestamps.size()];
+		for(i = 0; i < hashtags_timestamps.size(); i++)
+		{
+			tstamps[i] = hashtags_timestamps[i].c_str();  //copy string from vector into array
+		}
+		//17 spaces on the timestamp
+		qsort((void *) tstamps, hashtags_timestamps.size(), 17, alphabetize);
+		cout << endl <<  "------------------------------------------------------------------------------------------" << endl << tag_iter->first << endl;
+		for(i = 0; i < hashtags_timestamps.size(); i++)
+		{
+			cout << "\t" << hashtags_timestamps[i] << ": " << temp_bin_map[hashtags_timestamps[i]] << endl;
+		}
+		cout << "------------------------------------------------------------------------------------------" << endl;
 //		cout << endl << key << ": " << endl;
 		//foreach pair of timestamp, number values
 //		cout <<"\t"<< timestamp << ": " << number << endl;
 	}
 }	
+
+int alphabetize(const void * first, const void * second)
+{
+	int i;
+	char * f = (char *) first;
+	char * s = (char *) second;
+	for(i = 0; i <17; i++)
+	{
+		if(f[i] < s[i])
+			return 1;
+		else if(s[i] < f[i])
+			return -1;
+	}
+	return 0;
+}
 
 void getNumberedMonth(string * toFill, string input)
 {
