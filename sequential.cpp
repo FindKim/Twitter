@@ -20,10 +20,20 @@
 #include <utility>
 #include <cstring>
 #include <boost/unordered_map.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <sstream>
+#include <ctype.h>
+#include <stdlib.h>
+#include <algorithm>
 
 #define DEBUG
 
 using namespace std;
+
+void getNumberedMonth(string *toFill, string input); 
+void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill);
+int alphabetize(const void * first, const void * second);
 
 int main(int argc, char *argv[])
 {
@@ -32,7 +42,6 @@ int main(int argc, char *argv[])
 		cout << "Usage: ./binaryName inFile.txt outFile.txt BIN_WIDTH" << endl;
 		return 1;
 	}
-
 /////DECLARE VARIABLES/////////
 	//get a reading stream and a writing stream
 	ifstream inFile;
@@ -40,21 +49,38 @@ int main(int argc, char *argv[])
 	
 	//bin width in minutes
 	int BIN_WIDTH = atoi(argv[3]);
-	
+	if(24*60 % BIN_WIDTH != 0)
+	{
+		cout << "BIN_WIDTH has at best minute granularity and must divide the 1440 minutes in a day equally" << endl;
+		return 1;
+	}	
+
 	//map of hashtag keys and all associated timestamps
-	boost::unordered_map<string, boost::unordered_map<string, int> >  hashtags_to_map;
+	boost::unordered_map<string, boost::unordered_map<string, int> >  hashtags_to_maps;
 	
 	//the current tweet we are parsing
 	string current_tweet;
 
 	//working toward the timestamp
-	string created_string = "\"created_at\":";
-	string working_to_timestamp;
-	string minute_timestamp;
 	string bin_timestamp;
+	string first_timestamp; //file comes in in chronological order
+
+	//working toward finding hashtags
+	string text_of_tweet_string = "\"text\": \"";
+	string current_hashtag;
+	boost::unordered_map<string, int> temp_bin_map;
+
+	//general indicies for loops and string work
 	int temp_index;
 	int end_index;
-	int i;
+	int start_index;
+	int i, j, k;
+
+	//iterators for working through maps
+	boost::unordered_map<string, boost::unordered_map<string, int> >::iterator last_hashtag;
+	boost::unordered_map<string, boost::unordered_map<string, int> >::iterator tag_iter;
+	boost::unordered_map<string, int>::iterator last_timestamp;
+	boost::unordered_map<string, int>::iterator time_iter;
 
 /////END DECLARING VARIABLES
 	inFile.open(argv[1], ios_base::in);
@@ -64,38 +90,198 @@ int main(int argc, char *argv[])
 		cout << "Either I could not open " << argv[1] << " for reading or " << argv[2] << "for writing." << endl;
 		return 1;
 	}
-	
+
+	//get a line
+	getline(inFile, current_tweet);
+	get_bin_timestamp(current_tweet, BIN_WIDTH, first_timestamp);
+	#ifdef DEBUG
+		cout << "First tweet" << endl;
+	#endif
 	//while there is input file
-	while(!inFile.fail())
+	while(!inFile.eof())
 	{
-		//get a line, will set eofbit on infile if it hits it
-		getline(inFile, current_tweet);
-		
-		#ifdef DEBUG
-//			cout << endl << current_tweet << endl;
-		#endif
-	
-		// to the timestamp
-			temp_index = current_tweet.find(created_string) + created_string.length() + 7;
-			end_index = temp_index;
-			for(i = 0; i < 2; i++)
-			{
-				end_index = current_tweet.find(":", end_index + 1);
-			}			
-			working_to_timestamp = current_tweet.substr(temp_index, end_index-temp_index);
-			cout << working_to_timestamp << endl;
-			//manipulate the timestamp via more strtoks(NULL)
+		get_bin_timestamp(current_tweet, BIN_WIDTH, bin_timestamp);
+
+		//we have the appropriate bin timestamp, now look for #tags
+		temp_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();
 		
 		//strtok(originalString) until you find "text":
-			//strtok(NULL) for # or the end of text field
-			//if the first character is #, "emit" the hashtag word and the new timestamp by putting them into the hashmap
+		start_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();  //index of first character in actual tweet text
+		end_index = current_tweet.find("\", \""); //the end of the text field of the tweet
+		for(i = start_index; i < end_index; i++)
+		{
+			if(current_tweet[i] == '#')
+			{//we've got a hash tag, read the word. hashtags only use letters, numbers, and _
+			 //if hashtag is last word, the end quotes on the text will end the hasthag
+				for(j = i+1; isalnum(current_tweet[j]) || current_tweet[j] == '_'; j++)
+				{} //makes j the end of the hashtag
+				current_hashtag = current_tweet.substr(i, j-i);
+				for(k = 0; k < current_hashtag.length(); k++)
+				{
+					current_hashtag[k] = tolower(current_hashtag[k]);
+				}
+				i = j;  //skip ahead in the for loop
+				#ifdef DEBUG
+					cout << "\tOne hashtag is: " << current_hashtag << endl;
+				#endif
+
+				//get a reference to the map of timestamp bins to counts for this hashtag
+				#ifdef DEBUG
+					cout << "\t\thashtags_to_mapp[current_hashtag][bin_timestamp] before: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
+				#endif
+				
+				hashtags_to_maps[current_hashtag][bin_timestamp]++;			
+
+				#ifdef DEBUG
+					cout << "\t\thashtags_to_maps[current_hashtag][bin_timestamp] after: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
+				#endif
+/*
+				temp_bin_map = hashtags_to_maps[current_hashtag];
+				//increment the count in the correct timestamp bin, which is 0 on creation because c++ is nice to us like that
+				temp_bin_map[bin_timestamp] = temp_bin_map[bin_timestamp] + 1; 
+				#ifdef DEBUG
+					cout << "\t\ttemp_bin_map after increment: " << bin_timestamp << " => " << temp_bin_map[bin_timestamp] << endl;
+				#endif */
+			}
+		}
+		//get a line
+		getline(inFile, current_tweet);
 		#ifdef DEBUG
-		return 1;
+			cout << "next tweet" << endl;
 		#endif
 	}//end get a line loop
 	
-	//foreach key in the hashmap
+	last_hashtag = hashtags_to_maps.end(); //save some function calls to getting the end iterator
+	for(tag_iter = hashtags_to_maps.begin(); tag_iter != last_hashtag; ++tag_iter)
+	{//foreach key in the map (i.e. each hashtag)
+		temp_bin_map = tag_iter->second; //get the value, which is another map
+
+		last_timestamp = temp_bin_map.end(); //save more function calls
+		vector<string> hashtags_timestamps;
+		for(time_iter = temp_bin_map.begin(); time_iter != last_timestamp; ++time_iter)
+		{
+			hashtags_timestamps.push_back(time_iter->first);
+		}
+							 //Y    _   M   _   D   _   T _'\0'
+		const char *tstamps[hashtags_timestamps.size()];
+		for(i = 0; i < hashtags_timestamps.size(); i++)
+		{
+			tstamps[i] = hashtags_timestamps[i].c_str();  //copy string from vector into array
+		}
+		//17 spaces on the timestamp
+		qsort((void *) tstamps, hashtags_timestamps.size(), 17, alphabetize);
+		outFile << endl <<  "------------------------------------------------------------------------------------------" << endl << tag_iter->first << endl;
+		for(i = 0; i < hashtags_timestamps.size(); i++)
+		{
+			outFile << "\t" << hashtags_timestamps[i] << ": " << temp_bin_map[hashtags_timestamps[i]] << endl;
+		}
+		outFile << "------------------------------------------------------------------------------------------" << endl;
 //		cout << endl << key << ": " << endl;
 		//foreach pair of timestamp, number values
 //		cout <<"\t"<< timestamp << ": " << number << endl;
+	}
+	inFile.close();
+	outFile.close();
 }	
+
+int alphabetize(const void * first, const void * second)
+{
+	int i;
+	char * f = (char *) first;
+	char * s = (char *) second;
+	for(i = 0; i <17; i++)
+	{
+		if(f[i] < s[i])
+			return 1;
+		else if(s[i] < f[i])
+			return -1;
+	}
+	return 0;
+}
+
+void getNumberedMonth(string * toFill, string input)
+{
+	if(input == "Jan")
+		*toFill = "01";
+	else if(input == "Feb")
+		*toFill = "02";
+	else if(input == "Mar")
+		*toFill = "03";
+	else if(input == "Apr")
+		*toFill = "04";
+	else if(input == "May")
+		*toFill = "05";
+	else if(input == "Jun")
+		*toFill = "06";
+	else if(input == "Jul")
+		*toFill = "07";
+	else if(input == "Aug")
+		*toFill = "08";
+	else if(input == "Sep")
+		*toFill = "09";
+	else if(input == "Oct")
+		*toFill = "10";
+	else if(input == "Nov")
+		*toFill = "11";
+	else if(input == "Dec")
+		*toFill = "12";
+}
+
+void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill)
+{
+	string whole_timestamp;
+	string minute_timestamp;
+	vector<string> timestamp_parts;
+	string numbered_month;
+	short minutes_from_midnight;
+	short bin_minutes_from_midnight;
+	vector<string> time_of_day_parts;
+	short hour;
+	short minute;
+	short temp_index;
+	short end_index;
+	short i;
+	string created_string = "\"created_at\":";
+	char text_hour[2], text_minute[2];
+
+	//find the the timestamp
+	temp_index = tweet.find(created_string) + created_string.length() + 7;  //there's some spaces and a constant length day of the week
+	end_index = temp_index;
+	for(i = 0; i < 2; i++)
+	{
+		end_index = tweet.find(":", end_index + 1);
+	}
+		
+	whole_timestamp = tweet.substr(temp_index, end_index-temp_index);
+	#ifdef DEBUG
+		cout << "\twholetimestamp = " << whole_timestamp << endl;
+	#endif
+	boost::algorithm::split(timestamp_parts, whole_timestamp, boost::algorithm::is_any_of(" "));
+	
+	//right now month is a 3 letter abbreviation
+	getNumberedMonth(&numbered_month, timestamp_parts[1]);
+
+	boost::algorithm::split(time_of_day_parts, timestamp_parts[3], boost::algorithm::is_any_of(":"));
+
+	minutes_from_midnight = 60 * atoi(time_of_day_parts[0].c_str()) + atoi(time_of_day_parts[1].c_str()); //60 minutes per hour
+
+	bin_minutes_from_midnight = ( minutes_from_midnight / bin_size ) * bin_size;  //leveraging integer division for the greater good
+
+	hour = bin_minutes_from_midnight / 60;
+	minute = bin_minutes_from_midnight % 60;
+	if(hour < 10)
+		sprintf(text_hour, "0%d", hour);
+	else
+		sprintf(text_hour, "%d", hour);
+
+	if(minute < 10)
+		sprintf(text_minute, "0%d", minute);
+	else
+		sprintf(text_minute, "%d", minute);
+	
+	stamp_to_fill = timestamp_parts[2].append(" ").append(numbered_month).append(" ").append(timestamp_parts[0]).append(" ").append(text_hour).append(":").append(text_minute);
+
+	#ifdef DEBUG
+		cout << "\tbintimestamp = " << stamp_to_fill << "   where bin is of size " << bin_size << endl;
+	#endif
+}

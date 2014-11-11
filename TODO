@@ -1,0 +1,2 @@
+Maybe reverse sequential's order of hashtag and timestamp. Don't bother finding a timestamp if you don't have a hashtag. Rarely are there more than 2 or 3 hashtags per timestamp, but there are lots of tweets w/o hashtags. Small tradeoff in hope of speed
+Perhaps pick better data structures for the second item in the map/when we read the map within the map
