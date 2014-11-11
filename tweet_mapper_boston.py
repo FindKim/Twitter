@@ -8,8 +8,8 @@
 #		Reads in a line of tweet from Twitter API		#
 #		Parses tweet by hashtag and timestamp				#
 #																								#
-#		tailored for crimea dataset: ' '						#
-#		timestamp: Wed Feb 19 18:16:01 +0000 2014		#
+#		tailored for boston dataset: " "						#
+#		timestamp: Mon, 15 Apr 2013 21:11:17 +0000	#
 #																								#
 #		emits (key, value) = (hashtag, timestamp)		#
 #																								#
@@ -23,10 +23,9 @@ import string
 import unicodedata
 
 
-# Function converts timestamp of API tweet: Wed Feb 19 18:16:01 +0000 2014
+# Function converts timestamp of API tweet: Mon, 15 Apr 2013 21:11:17 +0000
 # To 2013 4 15 21:11:17
-#WEEKDAY, DAY, MONTH, YEAR, TIME, MISC = range(6)	# 0, 1, 2, 3, 4, 5
-WEEKDAY, MONTH, DAY, TIME, MISC, YEAR = range(6)
+WEEKDAY, DAY, MONTH, YEAR, TIME, MISC = range(6)	# 0, 1, 2, 3, 4, 5
 def convert_timestamp(ts):
 
 	month = str()
@@ -69,20 +68,20 @@ hashtag_pattern = re.compile('^#')
 for line in fileinput.input():
 	line = line.rstrip()	# Removes carriage return
 	
-	tweetAPI = re.search('\'text\': \'.*?\'', line)
+	tweetAPI = re.search('\"text\": \".*?\"', line)
 	
 	# Parses only text of tweet
 	if tweetAPI:
-		tweet = tweetAPI.group(0).strip('\'')
-		tweet = tweet.split('\': \'')[1]
+		tweet = tweetAPI.group(0).strip('"')
+		tweet = tweet.split('": "')[1]
 
 		# Check if hashtag is within tweet text
 		if (tweet.find('#') != -1):
 		
 			# Get timestamp
-			timestampAPI = re.search('\'created_at\': \'.*?\'', line)
-			timestamp = timestampAPI.group(0).strip('\'')
-			timestamp = timestamp.split('\': \'')[1]
+			timestampAPI = re.search('"created_at": ".*?"', line)
+			timestamp = timestampAPI.group(0).strip('"')
+			timestamp = timestamp.split('": "')[1]
 			timestamp = convert_timestamp(timestamp)
 			#print tweet, timestamp
 		
