@@ -23,6 +23,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <sstream>
+#include <ctype.h>
 
 #define DEBUG
 
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
 	int BIN_WIDTH = atoi(argv[3]);
 	
 	//map of hashtag keys and all associated timestamps
-	boost::unordered_map<string, boost::unordered_map<string, int> >  hashtags_to_map;
+	boost::unordered_map<string, boost::unordered_map<string, int> >  hashtags_to_maps;
 	
 	//the current tweet we are parsing
 	string current_tweet;
@@ -62,13 +63,14 @@ int main(int argc, char *argv[])
 
 	//working toward finding hashtags
 	string text_of_tweet_string = "\"text\": \"";
-	
+	string current_hashtag;
+	boost::unordered_map<string, int> temp_bin_map;
 
 	//general indicies for loops and string work
 	int temp_index;
 	int end_index;
 	int start_index;
-	int i;
+	int i, j, k;
 
 /////END DECLARING VARIABLES
 	inFile.open(argv[1], ios_base::in);
@@ -104,8 +106,30 @@ int main(int argc, char *argv[])
 		temp_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();
 		
 		//strtok(originalString) until you find "text":
-			//strtok(NULL) for # or the end of text field
-			//if the first character is #, "emit" the hashtag word and the new timestamp by putting them into the hashmap
+		start_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();  //index of first character in actual tweet text
+		end_index = current_tweet.find("\", \""); //the end of the text field of the tweet
+		for(i = start_index; i < end_index; i++)
+		{
+			if(current_tweet[i] == '#')
+			{//we've got a hash tag, read the word. hashtags only use letters, numbers, and _
+			 //if hashtag is last word, the end quotes on the text will end the hasthag
+				for(j = i+1; isalnum(current_tweet[j]) || current_tweet[j] == '_'; j++)
+				{} //makes j the end of the hashtag
+				current_hashtag = current_tweet.substr(i, j-i);
+				for(k = 0; k < current_hashtag.length(); k++)
+				{
+					current_hashtag[k] = tolower(current_hashtag[k]);
+				}
+				i = j;  //skip ahead in the for loop
+				
+				//get the map of timestamp bins to counts for this hashtag
+				temp_bin_map = hashtags_to_maps[current_hashtag];
+
+				//increment the count in the correct timestamp bin, which is 0 on creation because c++ is nice to us like that
+				temp_bin_map[bin_timestamp]++; 
+			}
+		}
+		
 
 		//get a line
 		getline(inFile, current_tweet);
