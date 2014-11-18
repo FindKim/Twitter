@@ -82,10 +82,14 @@ int main(int argc, char *argv[])
 	boost::unordered_map<string, int>::iterator last_timestamp;
 	boost::unordered_map<string, int>::iterator time_iter;
 
+	#ifdef DEBUG
+		int numTweets = 0;
+	#endif
+
 /////END DECLARING VARIABLES
 	inFile.open(argv[1], ios_base::in);
 	outFile.open(argv[2], ios_base::out);
-	if(inFile.fail() || outFile.fail())
+	if(inFile.fail() || outFile.fail() || !outFile.is_open() || !outFile.good() || !inFile.good() || !inFile.is_open())
 	{
 		cout << "Either I could not open " << argv[1] << " for reading or " << argv[2] << "for writing." << endl;
 		return 1;
@@ -95,6 +99,7 @@ int main(int argc, char *argv[])
 	getline(inFile, current_tweet);
 	get_bin_timestamp(current_tweet, BIN_WIDTH, first_timestamp);
 	#ifdef DEBUG
+		numTweets++;
 		cout << "First tweet" << endl;
 	#endif
 	//while there is input file
@@ -104,9 +109,14 @@ int main(int argc, char *argv[])
 
 		//we have the appropriate bin timestamp, now look for #tags
 		temp_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();
-		
+
+		//in case the line is not a tweet (perhaps a stray \n at the end of the file)
+		if(temp_index == -1)
+			continue;
+
 		//strtok(originalString) until you find "text":
 		start_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();  //index of first character in actual tweet text
+
 		end_index = current_tweet.find("\", \""); //the end of the text field of the tweet
 		for(i = start_index; i < end_index; i++)
 		{
@@ -135,27 +145,23 @@ int main(int argc, char *argv[])
 				#ifdef DEBUG
 					cout << "\t\thashtags_to_maps[current_hashtag][bin_timestamp] after: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
 				#endif
-/*
-				temp_bin_map = hashtags_to_maps[current_hashtag];
-				//increment the count in the correct timestamp bin, which is 0 on creation because c++ is nice to us like that
-				temp_bin_map[bin_timestamp] = temp_bin_map[bin_timestamp] + 1; 
-				#ifdef DEBUG
-					cout << "\t\ttemp_bin_map after increment: " << bin_timestamp << " => " << temp_bin_map[bin_timestamp] << endl;
-				#endif */
 			}
 		}
 		//get a line
-		getline(inFile, current_tweet);
-		#ifdef DEBUG
-			cout << "next tweet" << endl;
-		#endif
+		if(!inFile.eof())
+		{
+			getline(inFile, current_tweet);
+			#ifdef DEBUG
+				cout << "next tweet, number " << ++numTweets << endl;
+			#endif
+		}
 	}//end get a line loop
 	
 	last_hashtag = hashtags_to_maps.end(); //save some function calls to getting the end iterator
 	for(tag_iter = hashtags_to_maps.begin(); tag_iter != last_hashtag; ++tag_iter)
 	{//foreach key in the map (i.e. each hashtag)
-		temp_bin_map = tag_iter->second; //get the value, which is another map
 
+		temp_bin_map = tag_iter->second; //get the value, which is another map
 		last_timestamp = temp_bin_map.end(); //save more function calls
 		vector<string> hashtags_timestamps;
 		for(time_iter = temp_bin_map.begin(); time_iter != last_timestamp; ++time_iter)
@@ -168,35 +174,43 @@ int main(int argc, char *argv[])
 		{
 			tstamps[i] = hashtags_timestamps[i].c_str();  //copy string from vector into array
 		}
+
 		//17 spaces on the timestamp
 		qsort((void *) tstamps, hashtags_timestamps.size(), 17, alphabetize);
+
 		outFile << endl <<  "------------------------------------------------------------------------------------------" << endl << tag_iter->first << endl;
 		for(i = 0; i < hashtags_timestamps.size(); i++)
 		{
 			outFile << "\t" << hashtags_timestamps[i] << ": " << temp_bin_map[hashtags_timestamps[i]] << endl;
 		}
 		outFile << "------------------------------------------------------------------------------------------" << endl;
-//		cout << endl << key << ": " << endl;
-		//foreach pair of timestamp, number values
-//		cout <<"\t"<< timestamp << ": " << number << endl;
 	}
-	inFile.close();
-	outFile.close();
 }	
 
 int alphabetize(const void * first, const void * second)
 {
+	cout << "in alphab" << endl;
 	int i;
+	if(first == NULL || second == NULL)
+		cout << "AHHHHHHH" << endl;
+
 	char * f = (char *) first;
 	char * s = (char *) second;
 	for(i = 0; i <17; i++)
 	{
 		if(f[i] < s[i])
+		{
+			cout << "leaving alphab" << endl;
 			return 1;
+		}
 		else if(s[i] < f[i])
+		{
+			cout << "leaving alphab" << endl;
 			return -1;
+		}
 	}
 	return 0;
+	cout << "leaving alphab" << endl;
 }
 
 void getNumberedMonth(string * toFill, string input)
@@ -246,6 +260,11 @@ void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill)
 
 	//find the the timestamp
 	temp_index = tweet.find(created_string) + created_string.length() + 7;  //there's some spaces and a constant length day of the week
+
+	//in case there is no timestamp
+	if(temp_index == created_string.length() + 6)
+		return;
+
 	end_index = temp_index;
 	for(i = 0; i < 2; i++)
 	{
