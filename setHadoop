@@ -1,7 +1,0 @@
-setenv JAVA_HOME /afs/nd.edu/user37/ccl/software/external/java
-setenv HADOOP_HOME /afs/nd.edu/user37/ccl/software/external/hadoop
-setenv PATH ${JAVA_HOME}/bin:${HADOOP_HOME}/bin:$PATH
-setenv HADOOP_CLASSPATH ${HADOOP_HOME}/hadoop-0.21.0.jar
-setenv HADOOP_CLASSPATH ${HADOOP_CLASSPATH}:${HADOOP_HOME}/hadoop-common-0.21.0.jar
-setenv HADOOP_CLASSPATH ${HADOOP_CLASSPATH}:${HADOOP_HOME}/hadoop-hdfs-0.21.0.jar
-setenv HADOOP_CLASSPATH ${HADOOP_CLASSPATH}:${HADOOP_HOME}/hadoop-mapred-0.21.0.jar
