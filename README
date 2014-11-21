@@ -1,0 +1,7 @@
+hadoop jar $HADOOP_HOME/mapred/contrib/streaming/hadoop-*-streaming.jar \
+-input "/users/kngo/Twitter/tweets.txt" \
+-output /users/kngo/Twitter/output_crimea2 \
+-mapper tweet_mapper.py \
+-file tweet_mapper.py \
+-reducer tweet_reducer.py \
+-file tweet_reducer.py

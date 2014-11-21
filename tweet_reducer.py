@@ -29,7 +29,7 @@ for line in fileinput.input():
 	line = line.rstrip()	# Removes carriage return
 	
 	# Unique key = #prayforboston	2013 4 15 21:1
-	key = line[:-4]
+	key = line#[:-4]
 	
 	if key not in hashtag_dict:
 		hashtag_dict[key] = int()
