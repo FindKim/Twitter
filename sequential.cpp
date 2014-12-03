@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <algorithm>
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 
@@ -37,18 +37,18 @@ int alphabetize(const void * first, const void * second);
 
 int main(int argc, char *argv[])
 {
-	if(argc != 4)
+	if(argc != /*4*/3)
 	{// need binary name, file to read from, file to write to
-		cout << "Usage: ./binaryName inFile.txt outFile.txt BIN_WIDTH" << endl;
+		cout << "Usage: ./binaryName"/* inFile.txt*/ << " outFile.txt BIN_WIDTH" << endl;
 		return 1;
 	}
 /////DECLARE VARIABLES/////////
 	//get a reading stream and a writing stream
-	ifstream inFile;
+	//ifstream inFile;
 	ofstream outFile;
 	
 	//bin width in minutes
-	int BIN_WIDTH = atoi(argv[3]);
+	int BIN_WIDTH = atoi(argv[2]);
 	if(24*60 % BIN_WIDTH != 0)
 	{
 		cout << "BIN_WIDTH has at best minute granularity and must divide the 1440 minutes in a day equally" << endl;
@@ -87,24 +87,28 @@ int main(int argc, char *argv[])
 	#endif
 
 /////END DECLARING VARIABLES
-	inFile.open(argv[1], ios_base::in);
-	outFile.open(argv[2], ios_base::out);
-	if(inFile.fail() || outFile.fail() || !outFile.is_open() || !outFile.good() || !inFile.good() || !inFile.is_open())
+	outFile.open(argv[1], ios_base::out);
+	if(outFile.fail() || !outFile.is_open() || !outFile.good())
 	{
-		cout << "Either I could not open " << argv[1] << " for reading or " << argv[2] << "for writing." << endl;
+		cout << " I could not open " << argv[1] << "for writing." << endl;
 		return 1;
 	}
 
 	//get a line
-	getline(inFile, current_tweet);
+	getline(cin, current_tweet);
 	get_bin_timestamp(current_tweet, BIN_WIDTH, first_timestamp);
 	#ifdef DEBUG
 		numTweets++;
 		cout << "First tweet" << endl;
 	#endif
+
 	//while there is input file
-	while(!inFile.eof())
+	while(getline(cin, current_tweet))
 	{
+		#ifdef DEBUG
+			numTweets++;
+			cout << "New tweet, tweet number: " << numTweets << endl;
+		#endif
 		get_bin_timestamp(current_tweet, BIN_WIDTH, bin_timestamp);
 
 		//we have the appropriate bin timestamp, now look for #tags
@@ -137,7 +141,7 @@ int main(int argc, char *argv[])
 
 				//get a reference to the map of timestamp bins to counts for this hashtag
 				#ifdef DEBUG
-					cout << "\t\thashtags_to_mapp[current_hashtag][bin_timestamp] before: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
+					cout << "\t\thashtags_to_maps[current_hashtag][bin_timestamp] before: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
 				#endif
 				
 				hashtags_to_maps[current_hashtag][bin_timestamp]++;			
@@ -147,14 +151,7 @@ int main(int argc, char *argv[])
 				#endif
 			}
 		}
-		//get a line
-		if(!inFile.eof())
-		{
-			getline(inFile, current_tweet);
-			#ifdef DEBUG
-				cout << "next tweet, number " << ++numTweets << endl;
-			#endif
-		}
+		
 	}//end get a line loop
 	
 	last_hashtag = hashtags_to_maps.end(); //save some function calls to getting the end iterator
@@ -173,15 +170,16 @@ int main(int argc, char *argv[])
 		for(i = 0; i < hashtags_timestamps.size(); i++)
 		{
 			tstamps[i] = hashtags_timestamps[i].c_str();  //copy string from vector into array
+			cout << "Placing " << hashtags_timestamps[i].c_str() << " into tstamps" << endl;
 		}
 
-		//17 spaces on the timestamp
-		qsort((void *) tstamps, hashtags_timestamps.size(), 17, alphabetize);
+		//sort all timestamps for this one	
+		qsort(tstamps, hashtags_timestamps.size(), sizeof(char *), alphabetize);
 
 		outFile << endl <<  "------------------------------------------------------------------------------------------" << endl << tag_iter->first << endl;
 		for(i = 0; i < hashtags_timestamps.size(); i++)
 		{
-			outFile << "\t" << hashtags_timestamps[i] << ": " << temp_bin_map[hashtags_timestamps[i]] << endl;
+			outFile << "\t" << tstamps[i] << ": " << temp_bin_map[tstamps[i]] << endl;
 		}
 		outFile << "------------------------------------------------------------------------------------------" << endl;
 	}
@@ -189,28 +187,15 @@ int main(int argc, char *argv[])
 
 int alphabetize(const void * first, const void * second)
 {
-	cout << "in alphab" << endl;
+	
 	int i;
 	if(first == NULL || second == NULL)
 		cout << "AHHHHHHH" << endl;
 
-	char * f = (char *) first;
-	char * s = (char *) second;
-	for(i = 0; i <17; i++)
-	{
-		if(f[i] < s[i])
-		{
-			cout << "leaving alphab" << endl;
-			return 1;
-		}
-		else if(s[i] < f[i])
-		{
-			cout << "leaving alphab" << endl;
-			return -1;
-		}
-	}
-	return 0;
-	cout << "leaving alphab" << endl;
+	char ** f = (char **) first;
+	char ** s = (char **) second;
+	cout << "Comparing " << *f << " to " << *s << ": " << strcmp(*s,*f) << endl;
+
 }
 
 void getNumberedMonth(string * toFill, string input)
@@ -241,8 +226,9 @@ void getNumberedMonth(string * toFill, string input)
 		*toFill = "12";
 }
 
-void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill)
+void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill/*, bool set_zero_hour*/)
 {
+	static long zero_hour = 0;
 	string whole_timestamp;
 	string minute_timestamp;
 	vector<string> timestamp_parts;
