@@ -32,7 +32,7 @@ WEEKDAY, MONTH, DAY, TIME, MISC, YEAR = range(6)
 
 def convert_timestamp(ts):
 	try:
-		convert_timestamp.calls++;
+		convert_timestamp.calls+=1;
 	except AttributeError:
 		convert_timestamp.calls = 1;
 	
@@ -41,8 +41,8 @@ def convert_timestamp(ts):
 	bins_since_0_hour = 0;
 	ts = ts.split()	# Split by space
 	
-	if convert_timestamp.calls == 1:
-		convert_timestamp.zero_year = int(ts[YEAR])
+	#if convert_timestamp.calls == 1:	
+	convert_timestamp.zero_year = 2014 #int(ts[YEAR])
 		
 	if ts[MONTH] == 'Jan':
 		days_before = 0;
@@ -83,25 +83,23 @@ def convert_timestamp(ts):
 	else:
 		print "Error with " + ts[MONTH]
 		
-	if( ! (ts[YEAR] % 4) && days_before > 31):
-		days_before++;   # account for leap year
+	if( (int(ts[YEAR]) % 4) == 0 and days_before > 31):
+		days_before+=1;   # account for leap year
 
 	#figure out time bins from 0 hour
 	time = ts[TIME].split(':')
 	bins_since_0_hour += bins_per_hour * int(time[0]) + int(time[1][:-1]);
-
 	bins_since_0_hour += 24 * bins_per_hour * (days_before + int(ts[DAY]) - 1);
-	
 	bins_since_0_hour += (int(ts[YEAR]) - convert_timestamp.zero_year) * bins_per_year;
 
-	since_leap_year = convert_timestamp.zero_year % 4;
+	since_leap_year =  convert_timestamp.zero_year % 4;
 	leap_years_past = int( (int(ts[YEAR]) - convert_timestamp.zero_year) / 4);
 	if( ((int(ts[YEAR]) - convert_timestamp.zero_year) % 4) + since_leap_year >= 4):
-		leap_years_past++;
+		leap_years_past+=1;
 		
 	bins_since_0_hour += 24 * bins_per_hour * leap_years_past;
-	
-	ts = ts[YEAR] + " " + month + " " + ts[DAY] + " " + ts[TIME]
+
+	#ts = ts[YEAR] + " " + month + " " + ts[DAY] + " " + ts[TIME]
 	return bins_since_0_hour;
 
 
@@ -110,6 +108,7 @@ hashtag_pattern = re.compile('^#')
 
 # Parses line into (key, value)
 for line in fileinput.input():
+
 	line = line.rstrip()	# Removes carriage return
 	
 	tweetAPI = re.search('\'text\': \'.*?\'', line)
@@ -123,11 +122,13 @@ for line in fileinput.input():
 		if (tweet.find('#') != -1):
 		
 			# Get timestamp
-			timestampAPI = re.search('\'created_at\': \'.*?\'', line)
-			timestamp = timestampAPI.group(0).strip('\'')
+			#timestampAPI = re.search('\'created_at\': \'.*?\'', line)
+			all_ts = re.findall('\'created_at\': \'.*?\'', line)
+			which_ts = len(all_ts)
+			timestamp = all_ts[which_ts-1]
 			timestamp = timestamp.split('\': \'')[1]
+			timestamp = timestamp.strip('\'');
 			timestamp = convert_timestamp(timestamp)
-			#print tweet, timestamp
 		
 			# Get all hashtags
 			words = tweet.split()	# Split by space
@@ -146,4 +147,4 @@ for line in fileinput.input():
 						word = word.split('#')
 						for w in word:
 							if w != '':
-								print '#' + w.lower() + '\t' + timestamp
+								print '#' + w.lower() + '\t' + str(timestamp)

@@ -32,7 +32,7 @@ def main():
 			
 			if ht in top10_count.keys():
 				top10[ht].append((line[TIMESTAMP], line[COUNT]))
-		
+	
 	for key in top10.keys():
 		fname = 'output_' + key.strip('#') + '.txt'
 		with open(fname, 'w') as f:
@@ -40,7 +40,7 @@ def main():
 				line = str(x[0]).replace(" ","") + '\t'+ str(x[1]) + '\n'
 				f.write(line)
 	
-	os.system('gnuplot plot_hashtags_sample.gp')
+	os.system('gnuplot ./plot_hashtags_sample.gp')
 	
 	
 	

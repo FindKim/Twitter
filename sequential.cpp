@@ -165,38 +165,16 @@ int main(int argc, char *argv[])
 		{
 			hashtags_timestamps.push_back(time_iter->first);
 		}
-							 //Y    _   M   _   D   _   T _'\0'
-		const char *tstamps[hashtags_timestamps.size()];
-		for(i = 0; i < hashtags_timestamps.size(); i++)
-		{
-			tstamps[i] = hashtags_timestamps[i].c_str();  //copy string from vector into array
-			cout << "Placing " << hashtags_timestamps[i].c_str() << " into tstamps" << endl;
-		}
-
-		//sort all timestamps for this one	
-		qsort(tstamps, hashtags_timestamps.size(), sizeof(char *), alphabetize);
-
+		
+		sort(hashtags_timestamps.begin(), hashtags_timestamps.end());
 		outFile << endl <<  "------------------------------------------------------------------------------------------" << endl << tag_iter->first << endl;
 		for(i = 0; i < hashtags_timestamps.size(); i++)
 		{
-			outFile << "\t" << tstamps[i] << ": " << temp_bin_map[tstamps[i]] << endl;
+			outFile << "\t" << hashtags_timestamps[i] << ": " << temp_bin_map[hashtags_timestamps[i]] << endl;
 		}
 		outFile << "------------------------------------------------------------------------------------------" << endl;
 	}
 }	
-
-int alphabetize(const void * first, const void * second)
-{
-	
-	int i;
-	if(first == NULL || second == NULL)
-		cout << "AHHHHHHH" << endl;
-
-	char ** f = (char **) first;
-	char ** s = (char **) second;
-	cout << "Comparing " << *f << " to " << *s << ": " << strcmp(*s,*f) << endl;
-
-}
 
 void getNumberedMonth(string * toFill, string input)
 {
