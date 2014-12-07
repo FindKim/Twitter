@@ -41,13 +41,6 @@ def main():
 				f.write(line)
 	
 	os.system('gnuplot ./plot_hashtags_boston.gp')
-	
-	
-	
-
-
-#os.system("gnuplot plot_len_min_sum.gp")
-#os.system("ps2pdf results/smallest_min_sum_p.001.ps results/smallest_min_sum_p.001.pdf")
 
 if __name__ == "__main__":
 	main()
