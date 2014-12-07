@@ -216,7 +216,7 @@ void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill/*, bool
 	vector<string> time_of_day_parts;
 	short hour;
 	short minute;
-	short temp_index;
+	short temp_index = -1;
 	short offset_index;
 	short end_index;
 	short i;
@@ -232,7 +232,7 @@ void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill/*, bool
 	}
 
 	//in case there is no timestamp
-	if(temp_index == created_string.length() + 6)
+	if(temp_index == -1)
 		return;
 
 	end_index = temp_index;

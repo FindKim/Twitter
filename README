@@ -1,7 +1,33 @@
+In order to run our code and to see the data, you must be on a machine in the ND cluster which has hadoop set up on it. disc01.crc.nd.edu is one such machine.
+To run the jobs we have written, you also must have the correct environment variables set. Depending on your configuration file, these may already be set, but to be safe you can run ./setHadoop (for csh). If you are in a different shell, you can read setHadoop to see which variables to set.
+
+We have a four stage map reduce process. The results of the first of these stages can be compared to a sequential program written to achieve the same result.
+The results of the first and third stages can be combined to create a nice visualization of the data.
+The results of the fourth stage stand alone as an interesting set.
+
+All stages are accomplished by follow the same form except stage 3, which requires extra flags (\ represents that the line continues:
+
 hadoop jar $HADOOP_HOME/mapred/contrib/streaming/hadoop-*-streaming.jar \
--input "/users/kngo/Twitter/tweets.txt" \
--output /users/kngo/Twitter/output_crimea2 \
--mapper tweet_mapper.py \
--file tweet_mapper.py \
--reducer tweet_reducer.py \
--file tweet_reducer.py
+-input "/hadoop/path/to/input/input.txt" \
+-output /hadoop/path/to/output_directory \
+-mapper mapper.py \
+-file mapper.py \
+-reducer reducer.py \
+-file reducer.py
+
+The input file is an actual text file in Hadoop, and the output file is a directory which will contain two files upon completion, SUCCESS and part-00000.
+The results are in the part-00000 file, and the next stage requires /hadoop/path/to/output_directory/part-00000.
+
+The first stage uses a mapper that is called "tweet_mapper_{DATASET}.py" where the mapper is specific to the dataset. The reducer is tweet_reducer.py.
+This produces the results to the second stage, is a list of tab delimited triples of <hashtag, timebin, count>.
+
+The second stage uses assisted_wordcount_[mapper|reducer].pl as the mapper and reducer respectively. It takes the output of the first stage (in /path/to/output/part-00000) and produces a file listing <hashtag, totalCount>.
+
+The third stage uses ordering_[mapper|reducer].pl to sort the file created by round 2 of the map reduce, and needs flags to the suffle sort phase because of its end goal. Before the -input in the hadoop command, the following are also needed immediately after the hadoop jar line to sort descending by numeric keys:
+
+hadoop jar $HADOOP_HOME/mapred/contrib/streaming/hadoop-*-streaming.jar \
+-D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
+-D  mapred.text.key.comparator.options=-nr \
+-input "/hadoop/path/to/input/input.txt" \
+
+The fourth stage uses length_study_[mapper|reducer].pl to produce a file with pairs of <hashtag_length, avg_tweets>.

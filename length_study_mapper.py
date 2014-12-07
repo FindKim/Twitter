@@ -14,15 +14,15 @@ import sys
 import string
 
 def main():
-	if(len(sys.argv) != 3):
-		print 'Usage: ', sys.argv[0], ' [hashtags total count file] [top n hashtags]\n'
-		sys.exit(0)
+	#if(len(sys.argv) != 3):
+	#	print 'Usage: ', sys.argv[0], ' [hashtags total count file] [top n hashtags]\n'
+	#	sys.exit(0)
 	
 	#read in top n lines from file for descending popularity
-	with open(sys.argv[2], 'r') as ht_count_file:
-		top_n_raw = [next(ht_count_file) for x in xrange(int(sys.argv[1]))]
+	#with open(sys.argv[2], 'r') as ht_count_file:
+	#	top_n_raw = [next(ht_count_file) for x in xrange(int(sys.argv[1]))]
 		
-	for line in top_n_raw:
+	for line in fileinput.input():
 		line = line.strip()
 		line = line.split('\t')
 		if(len(line) >= 2):
