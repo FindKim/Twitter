@@ -22,8 +22,9 @@ import re
 import string
 import unicodedata
 
+#as a function of 10 minute time bins
 bins_per_hour = 6;
-bins_per_year = 52560;
+bins_per_year = 52560; 
 
 # Function converts timestamp of API tweet: Wed Feb 19 18:16:01 +0000 2014
 # To 2013 4 15 21:11:17
@@ -41,8 +42,9 @@ def convert_timestamp(ts):
 	bins_since_0_hour = 0;
 	ts = ts.split()	# Split by space
 	
-	#if convert_timestamp.calls == 1:	
-	convert_timestamp.zero_year = 2014 #int(ts[YEAR])
+	#tweets MUST come in in chronological order
+	if convert_timestamp.calls == 1:	
+		convert_timestamp.zero_year = int(ts[YEAR])
 		
 	if ts[MONTH] == 'Jan':
 		days_before = 0;
@@ -99,7 +101,6 @@ def convert_timestamp(ts):
 		
 	bins_since_0_hour += 24 * bins_per_hour * leap_years_past;
 
-	#ts = ts[YEAR] + " " + month + " " + ts[DAY] + " " + ts[TIME]
 	return bins_since_0_hour;
 
 
@@ -122,7 +123,6 @@ for line in fileinput.input():
 		if (tweet.find('#') != -1):
 		
 			# Get timestamp
-			#timestampAPI = re.search('\'created_at\': \'.*?\'', line)
 			all_ts = re.findall('\'created_at\': \'.*?\'', line)
 			which_ts = len(all_ts)
 			timestamp = all_ts[which_ts-1]

@@ -2,9 +2,10 @@
 
 #################################################
 #																								#
-#		tweet_mapper.py															#
+#		tweet_mapper_boston.py											#
 #		Created by Kim Ngo on Oct. 9, 2014					#
-#																								#
+#		Assisted by Ryan Boccabella									#							
+#                                               #
 #		Reads in a line of tweet from Twitter API		#
 #		Parses tweet by hashtag and timestamp				#
 #																								#
@@ -22,6 +23,7 @@ import re
 import string
 import unicodedata
 
+#based on 10 minute time bin
 bins_per_hour = 6;
 bins_per_year = 52560;
 
@@ -40,8 +42,8 @@ def convert_timestamp(ts):
 	ts = ts.split()	# Split by space
 	
 	#tweets MUST come in in chronological order
-	#if convert_timestamp.calls == 1:   # save the year for future reference if this is the first call 
-	convert_timestamp.zero_year = 2013
+	if convert_timestamp.calls == 1:   # save the year for future reference if this is the first call 
+		convert_timestamp.zero_year = int(ts[YEAR])
 	
 	if ts[MONTH] == 'Jan':
 		days_before = 0;
