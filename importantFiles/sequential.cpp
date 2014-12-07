@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <algorithm>
 
-//#define DEBUG
+#define DEBUG
 
 using namespace std;
 
@@ -37,14 +37,13 @@ int alphabetize(const void * first, const void * second);
 
 int main(int argc, char *argv[])
 {
-	if(argc != /*4*/3)
-	{// need binary name, file to read from, file to write to
-		cout << "Usage: ./binaryName"/* inFile.txt*/ << " outFile.txt BIN_WIDTH" << endl;
+	if(argc != 3)
+	{// need binary name, file to write to
+		cout << "Usage: ./binaryName outFile.txt BIN_WIDTH" << endl;
 		return 1;
 	}
 /////DECLARE VARIABLES/////////
-	//get a reading stream and a writing stream
-	//ifstream inFile;
+	//get a writing stream for output
 	ofstream outFile;
 	
 	//bin width in minutes
@@ -87,10 +86,12 @@ int main(int argc, char *argv[])
 	#endif
 
 /////END DECLARING VARIABLES
+	
+	//open file to write to
 	outFile.open(argv[1], ios_base::out);
 	if(outFile.fail() || !outFile.is_open() || !outFile.good())
 	{
-		cout << " I could not open " << argv[1] << "for writing." << endl;
+		cout << "Could not open " << argv[1] << "for writing." << endl;
 		return 1;
 	}
 
@@ -118,10 +119,11 @@ int main(int argc, char *argv[])
 		if(temp_index == -1)
 			continue;
 
-		//strtok(originalString) until you find "text":
-		start_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();  //index of first character in actual tweet text
+		//index of first character in actual tweet text
+		start_index = current_tweet.find(text_of_tweet_string) + text_of_tweet_string.length();  
 
-		end_index = current_tweet.find("\", \""); //the end of the text field of the tweet
+		//the end of the text field of the tweet
+		end_index = current_tweet.find("\", \""); 
 		for(i = start_index; i < end_index; i++)
 		{
 			if(current_tweet[i] == '#')
@@ -129,12 +131,17 @@ int main(int argc, char *argv[])
 			 //if hashtag is last word, the end quotes on the text will end the hasthag
 				for(j = i+1; isalnum(current_tweet[j]) || current_tweet[j] == '_'; j++)
 				{} //makes j the end of the hashtag
+				
+				//strip the hashtag out
 				current_hashtag = current_tweet.substr(i, j-i);
+				
+				//put it in lowercase
 				for(k = 0; k < current_hashtag.length(); k++)
 				{
 					current_hashtag[k] = tolower(current_hashtag[k]);
 				}
-				i = j;  //skip ahead in the for loop
+				
+				i = j-1;  //skip ahead in the for loop, i will still increment at end of loop
 				#ifdef DEBUG
 					cout << "\tOne hashtag is: " << current_hashtag << endl;
 				#endif
@@ -144,6 +151,7 @@ int main(int argc, char *argv[])
 					cout << "\t\thashtags_to_maps[current_hashtag][bin_timestamp] before: " << hashtags_to_maps[current_hashtag][bin_timestamp] << endl;
 				#endif
 				
+				//increase the count of occurrences of that hashtag in that timebin
 				hashtags_to_maps[current_hashtag][bin_timestamp]++;			
 
 				#ifdef DEBUG
@@ -153,14 +161,17 @@ int main(int argc, char *argv[])
 		}
 		
 	}//end get a line loop
-	
-	last_hashtag = hashtags_to_maps.end(); //save some function calls to getting the end iterator
+
+	//save some function calls to getting the end iterator
+	last_hashtag = hashtags_to_maps.end(); 
 	for(tag_iter = hashtags_to_maps.begin(); tag_iter != last_hashtag; ++tag_iter)
 	{//foreach key in the map (i.e. each hashtag)
 
 		temp_bin_map = tag_iter->second; //get the value, which is another map
 		last_timestamp = temp_bin_map.end(); //save more function calls
 		vector<string> hashtags_timestamps;
+		
+		//sort into 
 		for(time_iter = temp_bin_map.begin(); time_iter != last_timestamp; ++time_iter)
 		{
 			hashtags_timestamps.push_back(time_iter->first);
@@ -239,14 +250,19 @@ void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill/*, bool
 	short hour;
 	short minute;
 	short temp_index;
+	short offset_index;
 	short end_index;
 	short i;
 	string created_string = "\"created_at\":";
 	char text_hour[2], text_minute[2];
 
-	//find the the timestamp
-	temp_index = tweet.find(created_string) + created_string.length() + 7;  //there's some spaces and a constant length day of the week
+	//find the the last timestamp
+	while( (offset_index = tweet.find(created_string)) != -1)
+	{
+		temp_index = offset_index + created_string.length() + 7;  //there's some spaces and a constant length day of the week
+	}
 
+	temp_index = old_index;
 	//in case there is no timestamp
 	if(temp_index == created_string.length() + 6)
 		return;
