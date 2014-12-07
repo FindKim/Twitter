@@ -1,10 +1,17 @@
 #!/usr/bin/python
 
+#Kim Ngo and Ryan Boccabella
+#Cloud Computing Final Project - Hashtag Lifecycle
+
+#This script takes in a timestamp file (hashtag\ttimestamp\tcount) and a total
+#count file (hastag\ttotalCount) and 
+
 import os
 import sys
 
 HASHTAG, TOTAL_COUNT = range(2)
 HASHTAG, TIMESTAMP, COUNT = range(3)
+numlines = 10
 
 def main():
 	if (len(sys.argv) != 3):
@@ -12,7 +19,7 @@ def main():
 		sys.exit(0)
 	
 	with open(sys.argv[2], 'r') as ht_count_file:
-		top10_raw = [next(ht_count_file) for x in xrange(10)]
+		top10_raw = [next(ht_count_file) for x in xrange(numlines)]
 
 	# hashtag\ttotalcount
 	top10_count = dict()	# (hashtag, total count)

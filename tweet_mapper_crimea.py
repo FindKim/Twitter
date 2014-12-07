@@ -12,7 +12,7 @@
 #		timestamp: Wed Feb 19 18:16:01 +0000 2014		#
 #																								#
 #		emits (key, value) = (hashtag, timestamp)		#
-#																								#
+#		Mapper for first round of map reduce				#
 #################################################
 
 
@@ -45,7 +45,8 @@ def convert_timestamp(ts):
 	#tweets MUST come in in chronological order
 	if convert_timestamp.calls == 1:	
 		convert_timestamp.zero_year = int(ts[YEAR])
-		
+	
+	#keep track of the days prior to the start of this in order to calculate time bins
 	if ts[MONTH] == 'Jan':
 		days_before = 0;
 		month = '01'
@@ -88,12 +89,18 @@ def convert_timestamp(ts):
 	if( (int(ts[YEAR]) % 4) == 0 and days_before > 31):
 		days_before+=1;   # account for leap year
 
-	#figure out time bins from 0 hour
 	time = ts[TIME].split(':')
+	
+	#figure out time bins from 0 hour, which is 12:00am January 1 of year of first tweet
 	bins_since_0_hour += bins_per_hour * int(time[0]) + int(time[1][:-1]);
+	
+	#adds the number of hours * bins per hour, + the number of minutes by just looking at the 10s place
 	bins_since_0_hour += 24 * bins_per_hour * (days_before + int(ts[DAY]) - 1);
+	
+	#if you've changed years since the 0 hour, add the number of bins in a year
 	bins_since_0_hour += (int(ts[YEAR]) - convert_timestamp.zero_year) * bins_per_year;
 
+	#handle leap years
 	since_leap_year =  convert_timestamp.zero_year % 4;
 	leap_years_past = int( (int(ts[YEAR]) - convert_timestamp.zero_year) / 4);
 	if( ((int(ts[YEAR]) - convert_timestamp.zero_year) % 4) + since_leap_year >= 4):

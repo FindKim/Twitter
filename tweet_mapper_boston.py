@@ -13,7 +13,7 @@
 #		timestamp: Mon, 15 Apr 2013 21:11:17 +0000	#
 #																								#
 #		emits (key, value) = (hashtag, timestamp)		#
-#																								#
+#		mapper for first round of mapreduce 				#
 #################################################
 
 
@@ -45,6 +45,7 @@ def convert_timestamp(ts):
 	if convert_timestamp.calls == 1:   # save the year for future reference if this is the first call 
 		convert_timestamp.zero_year = int(ts[YEAR])
 	
+	#keep track of the days prior to the start of this in order to calculate time bins
 	if ts[MONTH] == 'Jan':
 		days_before = 0;
 		month = '01'
@@ -87,22 +88,25 @@ def convert_timestamp(ts):
 	if( (int(ts[YEAR]) % 4) == 0 and days_before > 31):
 		days_before+=1;  #account for leap year
 
-	#figure out time bins from 0 hour
+	#figure out time bins from 0 hour, which is 12:00am January 1 of year of first hashtag
 	time = ts[TIME].split(':')
+	
+	#adds the number of hours * bins per hour, + the number of minutes by just looking at the 10s place
 	bins_since_0_hour += bins_per_hour * int(time[0]) + int(time[1][:-1]);
 
+	#24 hours per day, times days, time bins per hour gives bins 
 	bins_since_0_hour += 24 * bins_per_hour * (days_before + int(ts[DAY]) - 1);
 	
+	#if you've changed years since the 0 hour, add the number of bins in a year
 	bins_since_0_hour += (int(ts[YEAR]) - convert_timestamp.zero_year) * bins_per_year;
 
+	#account for leap years
 	since_leap_year = convert_timestamp.zero_year % 4;
 	leap_years_past = int( (int(ts[YEAR]) - convert_timestamp.zero_year) / 4);
 	if( ((int(ts[YEAR]) - convert_timestamp.zero_year) % 4) + since_leap_year >= 4):
 		leap_years_past+=1;
-		
 	bins_since_0_hour += 24 * bins_per_hour * leap_years_past;
-	ts = ts[YEAR] + " " + month + " " + ts[DAY] + " " + ts[TIME]
-	
+
 	return bins_since_0_hour
 
 
@@ -124,21 +128,18 @@ for line in fileinput.input():
 		if (tweet.find('#') != -1):
 		
 			# Get timestamp
-			#timestampAPI = re.search('"created_at": ".*?"', line)
 			all_ts = re.findall('\"created_at\": \".*?\"', line)
 			which_ts = len(all_ts)
 			timestamp = all_ts[which_ts-1]
 			timestamp = timestamp.split('": "')[1]
 			timestamp = timestamp.strip('\'');
 			timestamp = convert_timestamp(timestamp)
-			#print tweet, timestamp
 		
 			# Get all hashtags
 			words = tweet.split()	# Split by space
 			for idx, word in enumerate(words):
 				if hashtag_pattern.match(word):
-				
-			
+
 					# Emits hastag and timestamp--tab delimiter
 					if hashtag_pattern.match(word):
 					

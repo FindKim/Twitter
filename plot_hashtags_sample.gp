@@ -1,5 +1,6 @@
 #
 #	Created by Kim Ngo, Nov. 18, 2014
+# Assisted by Ryan Boccabella
 #	Final Project
 #	Cloud Computing - CSE40822
 #
@@ -12,7 +13,7 @@ reset
 set terminal postscript
 set output "sample_plot_2.ps"
 
-set title "Hashtag lifetime"
+set title "Hashtag Lifetime"
 
 set xtics rotate nomirror out
 set ytics nomirror out
