@@ -34,8 +34,11 @@ while(<STDIN>)
 		}
 		else
 		{#length changed, print out info about the previous length
-			$avg = (1.0 * $totalCount) / $numOfLengthX;
-			print $oldLength."\t".$avg."\n";
+			if($numOfLengthX != 0)
+			{
+				$avg = (1.0 * $totalCount) / $numOfLengthX;
+				print $oldLength."\t".$avg."\n";
+			}
 			
 			#for the new hashtag length
 			$oldLength = $length;
@@ -45,7 +48,9 @@ while(<STDIN>)
 	}
 }
 
-$avg = (1.0 * $totalCount) / $numOfLengthX;
-print $oldLength."\t".$avg."\n";
-	
+if($numOfLengthX != 0)
+{
+	$avg = (1.0 * $totalCount) / $numOfLengthX;
+	print $oldLength."\t".$avg."\n";
+}
 	
