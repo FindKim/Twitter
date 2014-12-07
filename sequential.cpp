@@ -217,13 +217,19 @@ void get_bin_timestamp(string tweet, int bin_size, string &stamp_to_fill/*, bool
 	short hour;
 	short minute;
 	short temp_index;
+	short offset_index;
 	short end_index;
 	short i;
+	string tweet_copy = tweet;
 	string created_string = "\"created_at\":";
 	char text_hour[2], text_minute[2];
 
-	//find the the timestamp
-	temp_index = tweet.find(created_string) + created_string.length() + 7;  //there's some spaces and a constant length day of the week
+	//find the the final timestamp
+	while( (offset_index = tweet_copy.find(created_string)) != -1)
+	{
+		tweet_copy = tweet_copy.substr(offset_index+1, tweet_copy.length() - (offset_index + 1));
+		temp_index = offset_index + created_string.length() + 7;  //there's some spaces and a constant length day of the week
+	}
 
 	//in case there is no timestamp
 	if(temp_index == created_string.length() + 6)
