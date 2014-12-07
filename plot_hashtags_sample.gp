@@ -10,7 +10,7 @@ clear
 reset
 
 set terminal postscript
-set output "sample_plot.ps"
+set output "sample_plot_2.ps"
 
 set title "Hashtag lifetime"
 

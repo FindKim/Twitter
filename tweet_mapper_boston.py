@@ -30,7 +30,7 @@ bins_per_year = 52560;
 WEEKDAY, DAY, MONTH, YEAR, TIME, MISC = range(6)	# 0, 1, 2, 3, 4, 5
 def convert_timestamp(ts):
 	try:
-		convert_timestamp.calls++;
+		convert_timestamp.calls+=1;
 	except AttributeError:
 		convert_timestamp.calls = 1;
 
@@ -40,8 +40,8 @@ def convert_timestamp(ts):
 	ts = ts.split()	# Split by space
 	
 	#tweets MUST come in in chronological order
-	if convert_timestamp.calls == 1:   # save the year for future reference if this is the first call 
-		convert_timestamp.zero_year = int(ts[YEAR]);
+	#if convert_timestamp.calls == 1:   # save the year for future reference if this is the first call 
+	convert_timestamp.zero_year = 2013
 	
 	if ts[MONTH] == 'Jan':
 		days_before = 0;
@@ -82,6 +82,9 @@ def convert_timestamp(ts):
 	else:
 		print "Error with " + ts[MONTH]
 
+	if( (int(ts[YEAR]) % 4) == 0 and days_before > 31):
+		days_before+=1;  #account for leap year
+
 	#figure out time bins from 0 hour
 	time = ts[TIME].split(':')
 	bins_since_0_hour += bins_per_hour * int(time[0]) + int(time[1][:-1]);
@@ -93,7 +96,7 @@ def convert_timestamp(ts):
 	since_leap_year = convert_timestamp.zero_year % 4;
 	leap_years_past = int( (int(ts[YEAR]) - convert_timestamp.zero_year) / 4);
 	if( ((int(ts[YEAR]) - convert_timestamp.zero_year) % 4) + since_leap_year >= 4):
-		leap_years_past++;
+		leap_years_past+=1;
 		
 	bins_since_0_hour += 24 * bins_per_hour * leap_years_past;
 	ts = ts[YEAR] + " " + month + " " + ts[DAY] + " " + ts[TIME]
@@ -119,9 +122,12 @@ for line in fileinput.input():
 		if (tweet.find('#') != -1):
 		
 			# Get timestamp
-			timestampAPI = re.search('"created_at": ".*?"', line)
-			timestamp = timestampAPI.group(0).strip('"')
+			#timestampAPI = re.search('"created_at": ".*?"', line)
+			all_ts = re.findall('\"created_at\": \".*?\"', line)
+			which_ts = len(all_ts)
+			timestamp = all_ts[which_ts-1]
 			timestamp = timestamp.split('": "')[1]
+			timestamp = timestamp.strip('\'');
 			timestamp = convert_timestamp(timestamp)
 			#print tweet, timestamp
 		
@@ -142,4 +148,4 @@ for line in fileinput.input():
 						word = word.split('#')
 						for w in word:
 							if w != '':
-								print '#' + w.lower() + '\t' + timestamp
+								print '#' + w.lower() + '\t' + str(timestamp)
