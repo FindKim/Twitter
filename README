@@ -5,7 +5,7 @@ We have a four stage map reduce process. The results of the first of these stage
 The results of the first and third stages can be combined to create a nice visualization of the data.
 The results of the fourth stage stand alone as an interesting set.
 
-All stages are accomplished by follow the same form except stage 3, which requires extra flags (\ represents that the line continues:
+All stages are accomplished by follow the same form (\ represents that the line continues):
 
 hadoop jar $HADOOP_HOME/mapred/contrib/streaming/hadoop-*-streaming.jar \
 -input "/hadoop/path/to/input/input.txt" \
@@ -14,6 +14,8 @@ hadoop jar $HADOOP_HOME/mapred/contrib/streaming/hadoop-*-streaming.jar \
 -file mapper.py \
 -reducer reducer.py \
 -file reducer.py
+
+Rounds 3 and 4 require additional flags that are explained in turn.
 
 The input file is an actual text file in Hadoop, and the output file is a directory which will contain two files upon completion, SUCCESS and part-00000.
 The results are in the part-00000 file, and the next stage requires /hadoop/path/to/output_directory/part-00000.
@@ -30,4 +32,8 @@ hadoop jar $HADOOP_HOME/mapred/contrib/streaming/hadoop-*-streaming.jar \
 -D  mapred.text.key.comparator.options=-nr \
 -input "/hadoop/path/to/input/input.txt" \
 
-The fourth stage uses length_study_[mapper|reducer].pl to produce a file with pairs of <hashtag_length, avg_tweets>.
+This third round makes it easy to see which hashtags were the most popular throughout the entire collection period, and allows for an easy way to use the top, middle, or bottom parts (in terms of number of times a hashtag was tweeted) for studying hashtags. We use the top ten files to see the more interesting histograms, which we'll talk about shortly.
+
+The fourth stage uses length_study_[mapper|reducer].pl to produce a file with pairs of <hashtag_length, avg_tweets>. It, like round 3, requires the two -D options, but the second one need only by "...options=-n", it does not require the r. Round 4 takes an entire output file (part-00000 of the output directory) of a third round map reduce and produces a hashtag length to average number of occurrences per hashtag of that length. This gives insight into how the length of a hashtag might affect the number of times it occurs within a tweet.
+
+To create a graph, KIM FILL IN HERE
