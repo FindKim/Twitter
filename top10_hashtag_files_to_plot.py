@@ -1,20 +1,10 @@
 #!/usr/bin/python
 
-#Kim Ngo and Ryan Boccabella
-#Cloud Computing Final Project - Hashtag Lifecycle
-
-#script to take files from rounds 1 and 3 of mapreduce and prepare them
-#for gnuplot graphing of the top n files. Writes output_#.txt files for
-#use by plot_hashtags_sample.gp and calls plot_hashtags_sample.gp
-#As an aside: plot_hashtags_sample.gp contains only 1 output_#.txt to graph, and this
-#can be changed manually to see a different graph output in that .gp file
-
 import os
 import sys
 
 HASHTAG, TOTAL_COUNT = range(2)
 HASHTAG, TIMESTAMP, COUNT = range(3)
-n = 10
 
 def main():
 	if (len(sys.argv) != 3):
@@ -22,7 +12,7 @@ def main():
 		sys.exit(0)
 	
 	with open(sys.argv[2], 'r') as ht_count_file:
-		top10_raw = [next(ht_count_file) for x in xrange(n)]
+		top10_raw = [next(ht_count_file) for x in xrange(10)]
 
 	# hashtag\ttotalcount
 	top10_count = dict()	# (hashtag, total count)
@@ -43,7 +33,6 @@ def main():
 			if ht in top10_count.keys():
 				top10[ht].append((line[TIMESTAMP], line[COUNT]))
 	
-	#write output files for easy graphing
 	for key in top10.keys():
 		fname = 'output_' + key.strip('#') + '.txt'
 		with open(fname, 'w') as f:
@@ -51,7 +40,11 @@ def main():
 				line = str(x[0]).replace(" ","") + '\t'+ str(x[1]) + '\n'
 				f.write(line)
 	
-	os.system('gnuplot ./plot_hashtags_sample.gp')
+	#os.system('gnuplot ./plot_hashtags_sample.gp')
+	
+	
+	
+
 
 if __name__ == "__main__":
 	main()

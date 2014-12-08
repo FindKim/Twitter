@@ -11,9 +11,12 @@ clear
 reset
 
 set terminal postscript
+
+# CHANGE OUTPUT FILE NAME
+# COMMAND ps2pdf TO CONVERT PS TO PDF
 set output "sample_plot_2.ps"
 
-set title "Hashtag Lifetime"
+set title "Hashtag Lifecycle"
 
 set xtics rotate nomirror out
 set ytics nomirror out
@@ -24,6 +27,6 @@ set ylabel "# of hashtag occurences"
 
 set datafile separator "\t"
 
-plot 'output_putin.txt' using 1:2
 
-#pause -1
+# CHANGE INPUT FILE TO PLOT
+plot 'output_putin.txt' using 1:2

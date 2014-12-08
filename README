@@ -36,4 +36,11 @@ This third round makes it easy to see which hashtags were the most popular throu
 
 The fourth stage uses length_study_[mapper|reducer].pl to produce a file with pairs of <hashtag_length, avg_tweets>. It, like round 3, requires the two -D options, but the second one need only by "...options=-n", it does not require the r. Round 4 takes an entire output file (part-00000 of the output directory) of a third round map reduce and produces a hashtag length to average number of occurrences per hashtag of that length. This gives insight into how the length of a hashtag might affect the number of times it occurs within a tweet.
 
-To create a graph, KIM FILL IN HERE
+Create a graph:
+The output of the first MapReduce that produces the file listing <hashtag, timestamp/tcount> and the output from the third MapReduce that produces the file listing <hashtag, total_count> can be used to create gnuplot plots to visualize the lifecycle of a certain hashtag. To do so, you would need to extract all the occurences of the hashtag of choice along with the timestamp and count into a separate file. We did this with a python script "top10_hashtag_files_to_plot.py" that creates a file for the top 10 hashtags found with all the occurences for the respective hashtags in the file.
+	Usage: ./top10_hashtag_files_to_plot.py [hashtag time stamp file] [hashtag total count file]
+The script parses out all the occurences of a top hashtag from the file with timestamp and count into another file, [#hashtag].txt.
+	This file can then be used by the gnuplot script. plot_hashtags_sample.gp is a sample gnuplot script that plots the number of occurences the hashtag of interest is tweeted over time. 
+	Usage: gnuplot plot_hashtags_sample.gp
+	Usage: ps2pdf *.ps
+	Small tweaks are needed in the plot_hashtags_sample.gp script. The output name and the file to be plotted. Specific instructions where to edit are commented in the gnuplot script. "sample_plot.pdf" is a sample plot that the current gnuplot script outputs.
