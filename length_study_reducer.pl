@@ -14,11 +14,13 @@
 
 $numOfLengthX = 0;
 $totalCount = 0;
+$oldLength = -1;
 while(<STDIN>)
 {
 	chomp();
-	($length, $occurrences) = 	split('\t');
-	if(!defined($oldLength))
+	($length, $occurrences) = split('\t');
+
+	if($oldLength == -1)
 	{#define the first length, there has been 1 hastag of
 	 #this length (numOfLengthX++) and it occurred occurrences times
 		$oldLength = $length;
@@ -34,7 +36,7 @@ while(<STDIN>)
 		}
 		else
 		{#length changed, print out info about the previous length
-			if($numOfLengthX != 0)
+			if($numOfLengthX != 0 && $totalCount != 0)
 			{
 				$avg = (1.0 * $totalCount) / $numOfLengthX;
 				print $oldLength."\t".$avg."\n";
@@ -48,7 +50,7 @@ while(<STDIN>)
 	}
 }
 
-if($numOfLengthX != 0)
+if($numOfLengthX != 0 && $totalCount != 0)
 {
 	$avg = (1.0 * $totalCount) / $numOfLengthX;
 	print $oldLength."\t".$avg."\n";
