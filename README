@@ -44,3 +44,9 @@ The script parses out all the occurences of a top hashtag from the file with tim
 	Usage: gnuplot plot_hashtags_sample.gp
 	Usage: ps2pdf *.ps
 	Small tweaks are needed in the plot_hashtags_sample.gp script. The output name and the file to be plotted. Specific instructions where to edit are commented in the gnuplot script. "sample_plot.pdf" is a sample plot that the current gnuplot script outputs.
+	
+To get information on sequential performance and to see it run, look under /users/kngo/Twitter in hadoop for the [event]_tweets_files "directory." 'hadoop get' the appropriate files to your local space. Type make to compile sequential.cpp into the executable sequential via the available makefile. sequential reads from stdin and thus can then be invoked by:
+
+cat inputFile | ./sequential outputFile timeBinWidth
+
+We always used timeBinWidth = 10.
